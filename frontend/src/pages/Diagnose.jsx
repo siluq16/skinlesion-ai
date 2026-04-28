@@ -5,14 +5,14 @@ import { useDiagnosis } from "../hooks/useDiagnosis";
 import { getDiseaseInfo } from "../services/chatApi";
 
 const RISK_STYLE = {
-  high:   { bg: "bg-red-500/10 border-red-500/30",     text: "text-red-400",     badge: "bg-red-500/20 text-red-300"     },
-  medium: { bg: "bg-amber-500/10 border-amber-500/30", text: "text-amber-400",   badge: "bg-amber-500/20 text-amber-300" },
-  low:    { bg: "bg-emerald-500/10 border-emerald-500/30", text: "text-emerald-400", badge: "bg-emerald-500/20 text-emerald-300" },
+  high: { bg: "bg-red-500/10 border-red-500/30", text: "text-red-400", badge: "bg-red-500/20 text-red-300" },
+  medium: { bg: "bg-amber-500/10 border-amber-500/30", text: "text-amber-400", badge: "bg-amber-500/20 text-amber-300" },
+  low: { bg: "bg-emerald-500/10 border-emerald-500/30", text: "text-emerald-400", badge: "bg-emerald-500/20 text-emerald-300" },
 };
 const RISK_LABEL = {
-  high:   "⚠️ Nguy cơ cao — Cần khám bác sĩ ngay",
+  high: "⚠️ Nguy cơ cao — Cần khám bác sĩ ngay",
   medium: "⚡ Nguy cơ vừa — Nên theo dõi và tham khảo bác sĩ",
-  low:    "✅ Nguy cơ thấp — Theo dõi định kỳ",
+  low: "✅ Nguy cơ thấp — Theo dõi định kỳ",
 };
 
 export default function Diagnose() {
@@ -40,8 +40,8 @@ export default function Diagnose() {
   }, [result]);
 
   const isLoading = status === "loading";
-  const isDone    = status === "success";
-  const s         = result ? RISK_STYLE[result.risk] : null;
+  const isDone = status === "success";
+  const s = result ? RISK_STYLE[result.risk] : null;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -101,10 +101,9 @@ export default function Diagnose() {
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex-1 bg-slate-800/60 rounded-full h-2 overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all duration-1000 ${
-                          result.risk === "high" ? "bg-red-400" :
-                          result.risk === "medium" ? "bg-amber-400" : "bg-emerald-400"
-                        }`}
+                        className={`h-full rounded-full transition-all duration-1000 ${result.risk === "high" ? "bg-red-400" :
+                            result.risk === "medium" ? "bg-amber-400" : "bg-emerald-400"
+                          }`}
                         style={{ width: `${result.confidence * 100}%` }}
                       />
                     </div>
@@ -153,10 +152,10 @@ export default function Diagnose() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
-                      { label: "🧬 Nguyên nhân",  key: "nguyen_nhan", color: "text-blue-400"    },
-                      { label: "🩺 Triệu chứng",  key: "trieu_chung", color: "text-amber-400"   },
-                      { label: "💊 Điều trị",     key: "dieu_tri",    color: "text-emerald-400" },
-                      { label: "🛡️ Phòng ngừa",  key: "phong_ngua",  color: "text-purple-400"  },
+                      { label: "🧬 Nguyên nhân", key: "nguyen_nhan", color: "text-blue-400" },
+                      { label: "🩺 Triệu chứng", key: "trieu_chung", color: "text-amber-400" },
+                      { label: "💊 Điều trị", key: "dieu_tri", color: "text-emerald-400" },
+                      { label: "🛡️ Phòng ngừa", key: "phong_ngua", color: "text-purple-400" },
                     ].map(({ label, key, color }) => (
                       <div key={key} className="bg-slate-800/40 rounded-xl p-4">
                         <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${color}`}>{label}</p>
@@ -196,16 +195,59 @@ export default function Diagnose() {
 
         {/* Hint idle */}
         {status === "idle" && (
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              { icon: "📸", text: "Chụp rõ nét, đủ ánh sáng" },
-              { icon: "🔍", text: "Tổn thương chiếm phần lớn ảnh" },
-              { icon: "🚫", text: "Tránh bóng đổ, mờ nhòe" },
-            ].map(h => (
-              <div key={h.text} className="flex items-center gap-3 bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-500">
-                <span className="text-lg">{h.icon}</span>{h.text}
+          <div className="mt-8 space-y-4">
+            {/* Yêu cầu ảnh */}
+            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+              <p className="text-slate-300 font-bold text-sm mb-4">
+                📸 Yêu cầu ảnh để chẩn đoán chính xác
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2">✅ Ảnh tốt</p>
+                  <ul className="space-y-1.5">
+                    {[
+                      "Chụp sát tổn thương, chiếm 60-80% khung ảnh",
+                      "Ánh sáng đều, đủ sáng, không bóng đổ",
+                      "Ảnh nét, không mờ hoặc rung tay",
+                      "Nền da sạch xung quanh tổn thương",
+                      "Độ phân giải tối thiểu 224×224 px",
+                    ].map(t => (
+                      <li key={t} className="flex items-start gap-2 text-xs text-slate-400">
+                        <span className="mt-1.5 w-1 h-1 rounded-full bg-emerald-400 flex-shrink-0" />
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-red-400 text-xs font-bold uppercase tracking-widest mb-2">❌ Tránh</p>
+                  <ul className="space-y-1.5">
+                    {[
+                      "Chụp từ xa, tổn thương quá nhỏ",
+                      "Ảnh mờ, rung, phản sáng hoặc flash",
+                      "Che khuất bởi tóc hoặc quần áo",
+                      "Ảnh đã qua chỉnh sửa, filter màu",
+                      "Ảnh chụp màn hình từ internet",
+                    ].map(t => (
+                      <li key={t} className="flex items-start gap-2 text-xs text-slate-400">
+                        <span className="mt-1.5 w-1 h-1 rounded-full bg-red-400 flex-shrink-0" />
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            ))}
+            </div>
+
+            {/* Lưu ý quan trọng */}
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3">
+              <span className="text-lg flex-shrink-0">⚠️</span>
+              <p className="text-amber-200/60 text-xs leading-relaxed">
+                Hệ thống AI được huấn luyện trên ảnh da liễu chuyên khoa.
+                Kết quả chính xác nhất khi dùng ảnh chụp sát, rõ nét đúng vùng tổn thương.
+                Đây chỉ là công cụ hỗ trợ tham khảo — không thay thế bác sĩ chuyên khoa.
+              </p>
+            </div>
           </div>
         )}
       </div>
