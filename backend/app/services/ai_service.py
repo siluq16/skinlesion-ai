@@ -172,66 +172,56 @@ class SkinEnsembleModel(nn.Module):
 _model = None
 _device = None
 
-MODEL_PATH = "ml_models/skin_model.pth"
-GDRIVE_URL = "https://drive.google.com/file/d/13XovT0qo0agoNKG3uxFea44KEAIaAZhq/view?usp=sharing"
-
 def _load_model():
     global _model, _device
-    
-    # Singleton pattern: Nếu model đã load thì trả về luôn, tránh load lại nhiều lần
     if _model is not None:
         return _model, _device
 
-    cfg = get_settings()
+    cfg    = get_settings()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"[INFO] Device: {device}")
-    
-    # Đồng bộ đường dẫn hoàn toàn từ config
+
+    # ── Tự download model nếu chưa có ──────────
     model_path = Path(cfg.MODEL_PATH)
-
-    # Đưa logic download vào hàm để đảm bảo tính đóng gói
     if not model_path.exists():
-        print(f"[INFO] Tải model từ Google Drive xuống {model_path}...")
-        os.makedirs(model_path.parent, exist_ok=True)
-        # Sửa `id=` thành `url=` vì giá trị truyền vào là một URL đầy đủ
-        gdown.download(url=GDRIVE_URL, output=str(model_path), quiet=False)
+        print("[INFO] Downloading model from Google Drive...")
+        model_path.parent.mkdir(parents=True, exist_ok=True)
+        gdown.download(
+            id="13XovT0qo0agoNKG3uxFea44KEAIaAZhq",
+            output=str(model_path),
+            quiet=False,
+        )
 
-    # Khởi tạo kiến trúc model
+    # ── Khởi tạo ensemble ───────────────────────
     model = SkinEnsembleModel(
         num_classes=cfg.NUM_CLASSES,
         w_resnet=cfg.ENSEMBLE_WEIGHT_RESNET,
         w_effnet=cfg.ENSEMBLE_WEIGHT_EFFICIENTNET,
     )
 
-    # Load weights
+    # ── Load weights ────────────────────────────
     if model_path.exists():
         checkpoint = torch.load(model_path, map_location=device, weights_only=True)
-
         if isinstance(checkpoint, dict) and "resnet_state_dict" in checkpoint:
-            # Load ResNet
             model.resnet.model.load_state_dict(checkpoint["resnet_state_dict"])
             print("[INFO] ResNet50 weights loaded ✓")
-
-            # Load EfficientNet+CBAM
             model.effnet.load_state_dict(checkpoint["effnet_state_dict"])
             print("[INFO] EfficientNet-B4+CBAM weights loaded ✓")
         else:
-            print("[WARN] Unexpected checkpoint format. Vui lòng kiểm tra lại cấu trúc file .pth.")
+            print("[WARN] Unexpected checkpoint format.")
     else:
-        print(f"[WARN] Model không tồn tại tại {model_path}. Đang sử dụng random weights.")
+        print("[WARN] Model not found. Using random weights.")
 
-    # Đưa model vào thiết bị và chuyển sang chế độ suy luận
+    # ── Quantize trên CPU để tăng tốc ───────────
     model.to(device).eval()
-    
-    # Quantize nếu dùng CPU (Đã thụt lề dòng in log)
     if device.type == "cpu":
         model = torch.quantization.quantize_dynamic(
             model,
             {torch.nn.Linear},
-            dtype=torch.qint8
+            dtype=torch.qint8,
         )
-        print("[INFO] Model quantized cho CPU ✓")
-        
+        print("[INFO] Model quantized for CPU ✓")
+
     _model, _device = model, device
     return _model, _device
 
