@@ -1,0 +1,8 @@
+.env
+ml_models/*.pth
+ml_models/*.pt
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
