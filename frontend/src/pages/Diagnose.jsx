@@ -1,7 +1,6 @@
 // pages/Diagnose.jsx
 import { useState, useEffect } from "react";
 import ImageUploader from "../components/ImageUploader";
-import FloatingChatbot from "../components/FloatingChatbot";
 import { useDiagnosis } from "../hooks/useDiagnosis";
 import { getDiseaseInfo } from "../services/chatApi";
 
@@ -210,8 +209,6 @@ export default function Diagnose() {
           </div>
         )}
       </div>
-
-      <FloatingChatbot diagnosisContext={result || null} />
     </div>
   );
 }
